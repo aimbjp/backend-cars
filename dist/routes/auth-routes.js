@@ -24,9 +24,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const authController = __importStar(require("../controllers/auth-controller"));
+const authController = __importStar(require("../controllers/auth/auth-controller"));
 const router = (0, express_1.Router)();
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/token', authController.refreshToken);
+router.post('/request-password-reset', authController.requestPasswordReset);
+router.post('/reset-password', authController.resetPassword);
+// example: router.post('/token', checkAccessToken, authController.refreshToken);
 exports.default = router;
