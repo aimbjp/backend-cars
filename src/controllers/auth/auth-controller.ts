@@ -9,8 +9,9 @@ import {
     verifyRefreshToken, verifyResetToken
 } from "../../services/token-utils";
 import {removeRefreshToken} from "../../db/user/refresh-token";
-import {updateUserPassword} from "../../db/user/reset-password";
+import {changeUserPassword, updateUserPassword} from "../../db/user/reset-password";
 import {sendResetEmail} from "../../services/email-service";
+import {getUserIdFromToken} from "../../middleware/auth-middleware";
 
 
 /**
@@ -185,4 +186,47 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await updateUserPassword(email, hashedPassword);
     res.send('Password has been reset successfully');
+};
+
+
+/**
+ * Контроллер для обработки запроса на изменение пароля пользователя.
+ * Эта функция извлекает и верифицирует JWT из заголовка `Authorization` запроса,
+ * чтобы идентифицировать пользователя, который пытается изменить свой пароль.
+ *
+ * После успешной верификации токена функция извлекает из тела запроса старый и новый пароли.
+ * Старый пароль сравнивается с хэшем пароля в базе данных для проверки,
+ * что пользователь действительно владеет текущим паролем.
+ *
+ * Если проверка пройдена успешно, новый пароль хешируется и обновляется в базе данных.
+ *
+ * @param {Request} req - Объект запроса от клиента. Ожидается, что он содержит заголовок `Authorization`
+ *                        с JWT и тело с полями `oldPassword` и `newPassword`.
+ * @param {Response} res - Объект ответа сервера.
+ *
+ * Возвращает сообщение об успешном обновлении пароля или ошибку в случае неверного старого пароля,
+ * проблем с аутентификацией или других ошибок обработки запроса.
+ */
+export const changePasswordController = async (req: Request, res: Response) => {
+    // Извлечение токена из заголовков
+    const token = req.headers.authorization?.split(' ')[1];
+    // Получение userId из токена
+    const userId = token ? getUserIdFromToken(token) : null;
+
+    // Проверка на наличие userId из токена
+    if (!userId) {
+        return res.status(403).send('Access denied.');
+    }
+
+    // Извлечение старого и нового паролей из тела запроса
+    const { oldPassword, newPassword } = req.body;
+    // Вызов сервиса для изменения пароля
+    const result = await changeUserPassword(userId, oldPassword, newPassword);
+
+    // Отправка соответствующего ответа в зависимости от результата операции
+    if (result) {
+        res.send('Password successfully updated.');
+    } else {
+        res.status(400).send('Could not update password.');
+    }
 };

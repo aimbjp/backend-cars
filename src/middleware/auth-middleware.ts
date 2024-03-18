@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken';
  * @param {Response} res Объект ответа от express.
  * @param {NextFunction} next Функция для передачи управления следующему middleware в стеке.
  */
-const checkAccessToken = (req: Request, res: Response, next: NextFunction) => {
+export const checkAccessToken = (req: Request, res: Response, next: NextFunction) => {
     // Извлекаем токен из заголовка Authorization
     const token = req.headers['authorization']?.split(' ')[1];
 
@@ -45,4 +45,21 @@ const checkAccessToken = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export default checkAccessToken;
+
+/**
+ * Извлекает userId из переданного JWT.
+ *
+ * @param token JWT строка.
+ * @returns userId из токена или null, если токен невалидный или не содержит userId.
+ */
+export const getUserIdFromToken = (token: string): number | null => {
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as any;
+        return decoded.id;
+    } catch (error) {
+        console.error('Ошибка при декодировании токена:', error);
+        return null;
+    }
+};
+
+
