@@ -8,7 +8,7 @@ import {
     generateResetToken,
     verifyRefreshToken, verifyResetToken
 } from "../../services/token-utils";
-import {removeRefreshToken} from "../../db/user/refresh-token";
+import {findRefreshToken, removeRefreshToken} from "../../db/user/refresh-token";
 import {changeUserPassword, updateUserPassword} from "../../db/user/reset-password";
 import {sendResetEmail} from "../../services/email-service";
 import {getUserIdFromToken} from "../../middleware/auth-middleware";
@@ -25,13 +25,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const { username, password, email, name, surname } = req.body;
 
         if (!email || !password) {
-            res.status(400).send('Email and password are required');
+            res.status(400).send({success: false, message: 'Email and password are required'});
             return;
         }
 
         const existingUser = await findUserByEmail(email);
         if (existingUser) {
-            res.status(409).send('Email is already in use');
+            res.status(409).send({success: false, message: 'Email is already in use'});
             return;
         }
 
@@ -42,6 +42,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const refreshToken = await generateRefreshToken(newUser);
 
         res.status(201).json({
+            success: true,
             message: 'User created successfully',
             user: newUser,
             accessToken,
@@ -49,7 +50,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error registering new user');
+        res.status(500).send({success: false, message: 'Error registering new user'});
     }
 };
 
@@ -65,13 +66,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         const user = await findUserByEmail(email);
 
         if (!user) {
-            res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ success: false, message: 'User not found' });
             return;
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            res.status(401).json({ message: 'Invalid credentials' });
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
             return;
         }
 
@@ -79,13 +80,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         const refreshToken = await generateRefreshToken(user);
 
         res.json({
+            success: true,
             accessToken,
             refreshToken,
             user: { id: user.id, email: user.email, name: user.name, surname: user.surname, username: user.username }
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
 
@@ -99,24 +101,25 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-        res.status(401).json({ message: 'Refresh token is required' });
+        res.status(401).json({success: false, message: 'Refresh token is required' });
         return;
     }
 
     const userData = verifyRefreshToken(refreshToken);
-    if (!userData) {
-        res.status(403).json({ message: 'Invalid refresh token' });
+    const refreshTokenExist = await findRefreshToken(refreshToken);
+    if (!userData || !refreshTokenExist) {
+        res.status(403).json({success: false, message: 'Invalid refresh token' });
         return;
     }
 
     const user = await findUserById(userData.userId);
     if (!user) {
-        res.status(404).json({ message: 'User not found' });
+        res.status(404).json({success: false, message: 'User not found' });
         return;
     }
 
     const newAccessToken = generateAccessToken(user);
-    res.json({ accessToken: newAccessToken });
+    res.status(200).json({success: true, accessToken: newAccessToken });
 };
 
 /**
@@ -129,22 +132,22 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-        res.status(400).send('Refresh token is required');
+        res.status(400).send({success: false, message: 'Refresh token is required'});
         return;
     }
 
     const userData = verifyRefreshToken(refreshToken);
     if (!userData) {
-        res.status(403).send('Invalid refresh token');
+        res.status(403).send({success: false, message: 'Invalid refresh token'});
         return;
     }
 
     try {
         await removeRefreshToken(refreshToken);
-        res.send('User logged out successfully');
+        res.json({success: true, message: 'User logged out successfully'});
     } catch (err) {
         console.error(err);
-        res.status(500).send('Internal server error');
+        res.status(500).send({success: false, message: 'Internal server error'});
     }
 };
 
@@ -157,13 +160,13 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 export const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
     if (!email) {
-        res.status(400).send('Email is required');
+        res.status(400).send({success: false, message: 'Email is required'});
         return;
     }
 
     const token = await generateResetToken(email);
     await sendResetEmail(email, token);
-    res.send('Reset email sent');
+    res.send({success: true, message: 'Reset email sent'});
 };
 
 /**
@@ -178,14 +181,14 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Проверяем валидность токена
     const isValidToken = await verifyResetToken(email, token);
     if (!isValidToken) {
-        res.status(400).send('Invalid or expired reset token');
+        res.status(400).send({success: false, message: 'Invalid or expired reset token'});
         return;
     }
 
     // Токен валиден, обновляем пароль пользователя
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await updateUserPassword(email, hashedPassword);
-    res.send('Password has been reset successfully');
+    res.send({success: true, message: 'Password has been reset successfully'});
 };
 
 
@@ -215,7 +218,7 @@ export const changePasswordController = async (req: Request, res: Response) => {
 
     // Проверка на наличие userId из токена
     if (!userId) {
-        return res.status(403).send('Access denied.');
+        return res.status(403).send({success: false, message: 'Access denied.'});
     }
 
     // Извлечение старого и нового паролей из тела запроса
@@ -225,8 +228,8 @@ export const changePasswordController = async (req: Request, res: Response) => {
 
     // Отправка соответствующего ответа в зависимости от результата операции
     if (result) {
-        res.send('Password successfully updated.');
+        res.send({success: true, message:'Password successfully updated.'});
     } else {
-        res.status(400).send('Could not update password.');
+        res.status(400).send({success: false, message: 'Could not update password.'});
     }
 };

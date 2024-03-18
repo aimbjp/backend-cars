@@ -8,6 +8,7 @@ authRoutes.post('/login', authController.login);
 authRoutes.post('/token', authController.refreshToken);
 authRoutes.post('/request-password-reset', authController.requestPasswordReset);
 authRoutes.post('/reset-password', authController.resetPassword);
+authRoutes.post('/logout', authController.logout);
 
 // example: router.post('/token', checkAccessToken, authController.refreshToken);
 

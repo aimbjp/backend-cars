@@ -41,7 +41,7 @@ export const checkAccessToken = (req: Request, res: Response, next: NextFunction
     } catch (error) {
         // В случае ошибки верификации токена (например, если он истек или невалиден),
         // отправляем ошибку 403
-        return res.status(403).send('Invalid or expired token');
+        return res.status(403).send('jwt expired');
     }
 };
 

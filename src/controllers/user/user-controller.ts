@@ -13,9 +13,9 @@ import {getUserIdFromToken} from "../../middleware/auth-middleware";
 export const getUserByIdController = async (req: Request, res: Response) => {
     const user = await findUserById(parseInt(req.params.id));
     if (user) {
-        res.json(user);
+        res.json({success: true, user: user});
     } else {
-        res.status(404).send('User not found');
+        res.status(404).send({success: false, message: 'User not found'});
     }
 };
 
@@ -29,18 +29,18 @@ export const updateUserController = async (req: Request, res: Response) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
-            return res.status(401).send('Authorization token is missing.');
+            return res.status(401).send({success: false, message: 'Authorization token is missing.'});
         }
 
         const userId = getUserIdFromToken(token);
         if (!userId) {
-            return res.status(403).send('Invalid token or token does not contain user ID.');
+            return res.status(403).send({success: false, message: 'Invalid token or token does not contain user ID.'});
         }
 
         const updatedUser = await updateUser({ ...req.body, userId });
-        res.json(updatedUser);
+        res.json({success: true, user: updatedUser});
     } catch (error) {
         console.error('Error updating user:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send({success: false, message: 'Internal Server Error'});
     }
 };

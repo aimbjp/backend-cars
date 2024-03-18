@@ -41,16 +41,35 @@ export const saveRefreshToken = async (userId: number, token: string, expiresIn:
 
 /**
  * Удаляет refresh токен из базы данных.
- * @param token Значение refresh токена, который нужно удалить.
+ * @param refreshToken Значение refresh токена, который нужно удалить.
  */
-export const removeRefreshToken = async (token: string): Promise<void> => {
+export const removeRefreshToken = async (refreshToken: string): Promise<void> => {
     const deleteQuery = 'DELETE FROM refresh_tokens WHERE token = $1';
 
     try {
-        const result = await query(deleteQuery, [token]);
+        const result = await query(deleteQuery, [refreshToken]);
         console.log(`Removed ${result.rowCount} refresh token(s).`);
     } catch (error) {
         console.error('Error occurred during refresh token removal:', error);
         throw error;
     }
 };
+
+/**
+ * Проверяет наличие refresh токена в базе данных.
+ *
+ * @param refreshToken Строка, содержащая refresh токен, который необходимо найти.
+ * @returns Возвращает промис, разрешающийся в true, если токен найден, и в false, если нет.
+ */
+export const findRefreshToken = async (refreshToken: string): Promise<boolean> => {
+    const findQuery = 'SELECT 1 FROM refresh_tokens WHERE token = $1'
+
+    try {
+        const { rows } = await query(findQuery, [refreshToken]);
+        return rows.length > 0;
+    } catch (error) {
+        console.error('Error occurred during refresh token removal:', error);
+        return false;
+    }
+
+}

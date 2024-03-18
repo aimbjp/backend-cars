@@ -12,7 +12,6 @@ export const updateUserPassword = async (email: string, newPassword: string): Pr
 };
 
 
-
 /**
  * Изменяет пароль пользователя после проверки его текущего пароля.
  *
