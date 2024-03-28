@@ -19,7 +19,7 @@ export const createUser = async ({ username, password, email, name, surname }: U
         // Выполнение SQL-запроса на вставку нового пользователя в таблицу users
         // и возвращение его id, username, email, name, surname
         const { rows } = await query(
-            'INSERT INTO users (username, password, email, name, surname) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, name, surname',
+            'INSERT INTO users (username, password, email, name, surname) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, name, surname, role',
             [username, password, email, name, surname]
         );
 

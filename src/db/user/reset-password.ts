@@ -51,3 +51,24 @@ export const changeUserPassword = async (userId: number, oldPassword: string, ne
     // Возвращаем true, указывая на успешное изменение пароля
     return true;
 };
+
+
+/**
+ * Получает электронную почту пользователя по его токену.
+ *
+ * @param token Токен пользователя.
+ * @returns Возвращает электронную почту пользователя, если он найден, в противном случае возвращает undefined.
+ */
+export const getUserEmailByToken = async (token: string): Promise<string | undefined> => {
+    try {
+        const { rows } = await query(
+            'SELECT email FROM password_reset_tokens WHERE token = $1',
+            [token]
+        );
+        console.log(rows[0]?.email, " ", token)
+        return rows[0]?.email; // Вернет электронную почту пользователя, если он найден, иначе undefined
+    } catch (error) {
+        console.error("Error retrieving user email by token:", error);
+        return undefined;
+    }
+};

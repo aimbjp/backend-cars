@@ -11,7 +11,13 @@ import {getUserIdFromToken} from "../../middleware/auth-middleware";
  * @param res Ответ сервера.
  */
 export const getUserByIdController = async (req: Request, res: Response) => {
-    const user = await findUserById(parseInt(req.params.id));
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).send({success: false, message: 'Authorization token is missing.'});
+    }
+
+    const id = await getUserIdFromToken(token) || -1;
+    const user = await findUserById(id);
     if (user) {
         res.json({success: true, user: user});
     } else {

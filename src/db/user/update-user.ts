@@ -15,6 +15,7 @@ import { query } from '../database'; // Функция для выполнени
  *          без поля пароля, или `null`, если пользователя не найдено.
  */
 export const updateUser = async (user: Partial<UserRegistered>): Promise<UserRegistered | null> => {
+    //TODO: add checking for username same and for email same
     let queryText = 'UPDATE users SET ';
     const queryParams = [];
     let paramIndex = 1;

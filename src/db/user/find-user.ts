@@ -19,7 +19,7 @@ export const findUserByUsername = async (username: string) => {
  */
 export const findUserByEmail = async (email: string) => {
     const { rows } = await query(
-        'SELECT id AS "userId", username, email, password, name, surname FROM users WHERE email = $1',
+        'SELECT id AS "userId", username, email, name, surname, role FROM users WHERE email = $1',
         [email]);
     return rows[0]; // Вернет пользователя, если найден, иначе undefined
 };
@@ -32,7 +32,7 @@ export const findUserByEmail = async (email: string) => {
  */
 export const findUserById = async (userId: number): Promise<UserRegistered | null> => {
     try {
-        const { rows } = await query('SELECT * FROM users WHERE id = $1', [userId]);
+        const { rows } = await query('SELECT id, username, email, name, surname, role FROM users WHERE id = $1', [userId]);
         if (rows.length === 0) {
             return null; // Пользователь с таким ID не найден
         }
@@ -42,3 +42,24 @@ export const findUserById = async (userId: number): Promise<UserRegistered | nul
         throw err; // В случае ошибки при запросе к базе данных, перебрасываем исключение
     }
 };
+
+
+/**
+ * Находит пароль пользователя по его адресу электронной почты.
+ *
+ * @param {string} email Адрес электронной почты пользователя для поиска.
+ * @returns {Promise<string | null>} Пароль пользователя, если найден, иначе null.
+ */
+export const getUserPasswordByEmail = async (email: string): Promise<string | null> => {
+    try {
+        const { rows } = await query('SELECT password FROM users WHERE email = $1', [email]);
+        if (rows.length === 0) {
+            return null; // Пользователь с таким адресом электронной почты не найден
+        }
+        return rows[0].password; // Возвращаем пароль пользователя
+    } catch (err) {
+        console.error('Error querying the database', err);
+        throw err; // В случае ошибки при запросе к базе данных, перебрасываем исключение
+    }
+};
+

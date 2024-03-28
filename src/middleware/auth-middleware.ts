@@ -14,7 +14,7 @@ export const checkAccessToken = (req: Request, res: Response, next: NextFunction
     const token = req.headers['authorization']?.split(' ')[1];
 
     // Определяем требуемые права для доступа к ресурсу
-    const requiredPermissions = ['aimbjpw@gmail.com'];
+    const requiredPermissions = ['user'];
 
     // Проверяем наличие токена
     if (!token) {
@@ -26,10 +26,10 @@ export const checkAccessToken = (req: Request, res: Response, next: NextFunction
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as any;
 
         // Извлекаем права пользователя из payload токена
-        const userPermissions = decoded.email || [];
+        const userPermissions = decoded.role || [];
 
         // Проверяем, имеет ли пользователь необходимые права доступа
-        const hasAccess = requiredPermissions.every(email => userPermissions.includes(email));
+        const hasAccess = requiredPermissions.every(role => userPermissions.includes(role));
 
         // Если у пользователя недостаточно прав, отправляем ошибку 403
         if (!hasAccess) {
@@ -55,7 +55,7 @@ export const checkAccessToken = (req: Request, res: Response, next: NextFunction
 export const getUserIdFromToken = (token: string): number | null => {
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as any;
-        return decoded.id;
+        return decoded.userId;
     } catch (error) {
         console.error('Ошибка при декодировании токена:', error);
         return null;

@@ -6,10 +6,10 @@ import {changePasswordController} from "../controllers/auth/auth-controller";
 const userRoutes = Router();
 
 // Маршрут для получения информации о пользователе по ID
-userRoutes.get('/:id', checkAccessToken, getUserByIdController);
+userRoutes.get('/', checkAccessToken, getUserByIdController);
 
 // Маршрут для обновления данных пользователя
-userRoutes.patch('/:id', checkAccessToken, updateUserController);
+userRoutes.patch('/', checkAccessToken, updateUserController);
 
 userRoutes.post('/change-password', checkAccessToken, changePasswordController);
 

@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { createUser } from "../../db/user/create-user";
-import {findUserByEmail, findUserById} from "../../db/user/find-user";
+import {findUserByEmail, findUserById, findUserByUsername, getUserPasswordByEmail} from "../../db/user/find-user";
 import {
+    deleteResetToken,
     generateAccessToken,
     generateRefreshToken,
     generateResetToken,
     verifyRefreshToken, verifyResetToken
 } from "../../services/token-utils";
 import {findRefreshToken, removeRefreshToken} from "../../db/user/refresh-token";
-import {changeUserPassword, updateUserPassword} from "../../db/user/reset-password";
+import {changeUserPassword, getUserEmailByToken, updateUserPassword} from "../../db/user/reset-password";
 import {sendResetEmail} from "../../services/email-service";
 import {getUserIdFromToken} from "../../middleware/auth-middleware";
 
@@ -24,14 +25,28 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { username, password, email, name, surname } = req.body;
 
-        if (!email || !password) {
+        if (!email || !password || !username) {
             res.status(400).send({success: false, message: 'Email and password are required'});
             return;
         }
 
-        const existingUser = await findUserByEmail(email);
-        if (existingUser) {
+        // Проверка валидности email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            res.status(400).send({ success: false, message: "Invalid email format" });
+            return;
+        }
+
+        const existingUserEmail = await findUserByEmail(email);
+        const existingUserUsername = username && await findUserByUsername(username);
+
+        if (existingUserEmail) {
             res.status(409).send({success: false, message: 'Email is already in use'});
+            return;
+        }
+
+        if (existingUserUsername) {
+            res.status(409).send({success: false, message: 'Username is already in use'});
             return;
         }
 
@@ -70,7 +85,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        const realPassword: string = await getUserPasswordByEmail(user.email) || '';
+
+        const isValidPassword = await bcrypt.compare(password, realPassword);
         if (!isValidPassword) {
             res.status(401).json({ success: false, message: 'Invalid credentials' });
             return;
@@ -176,18 +193,20 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
  * @param {Response} res Ответ сервера.
  */
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
-    const { email, token, newPassword } = req.body;
+    const { token, password } = req.body;
 
     // Проверяем валидность токена
-    const isValidToken = await verifyResetToken(email, token);
-    if (!isValidToken) {
+    const isValidToken = await verifyResetToken(token);
+    const email = await getUserEmailByToken(token) || '';
+    if (!isValidToken || email == '') {
         res.status(400).send({success: false, message: 'Invalid or expired reset token'});
         return;
     }
 
     // Токен валиден, обновляем пароль пользователя
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     await updateUserPassword(email, hashedPassword);
+    deleteResetToken(token);
     res.send({success: true, message: 'Password has been reset successfully'});
 };
 
@@ -233,3 +252,5 @@ export const changePasswordController = async (req: Request, res: Response) => {
         res.status(400).send({success: false, message: 'Could not update password.'});
     }
 };
+
+

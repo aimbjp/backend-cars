@@ -71,11 +71,10 @@ export const generateResetToken = async (email: string): Promise<string> => {
  * @param token Токен восстановления пароля, который нужно проверить.
  * @returns {Promise<boolean>} Возвращает true, если токен валиден, иначе false.
  */
-export const verifyResetToken = async (email: string, token: string): Promise<boolean> => {
-    const { rows } = await query('SELECT * FROM password_reset_tokens WHERE email = $1 AND token = $2', [email, token]);
+export const verifyResetToken = async (token: string): Promise<boolean> => {
+    const { rows } = await query('SELECT * FROM password_reset_tokens WHERE token = $1', [token]);
     const tokenRecord = rows[0];
 
-    deleteResetToken(email, token);
 
     if (!tokenRecord) {
         // Токен не найден
@@ -98,12 +97,11 @@ export const verifyResetToken = async (email: string, token: string): Promise<bo
  * @param email Email пользователя, для которого выполняется сброс пароля.
  * @param token Токен сброса пароля, который нужно удалить.
  */
-export const deleteResetToken = async (email: string, token: string): Promise<void> => {
+export const deleteResetToken = async (token: string): Promise<void> => {
     try {
-        await query('DELETE FROM password_reset_tokens WHERE email = $1 AND token = $2', [email, token]);
-        console.log(`Reset token for ${email} has been deleted.`);
+        await query('DELETE FROM password_reset_tokens WHERE token = $1', [token]);
     } catch (error) {
-        console.error(`Error deleting reset token for ${email}:`, error);
+        console.error(`Error deleting reset token = ${token}:`, error);
         throw error;
     }
 };
