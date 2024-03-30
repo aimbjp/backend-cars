@@ -57,7 +57,7 @@ export const sendResetEmail = async (email: string, token: string): Promise<void
         // Инициализация Mailgun API
         const mg = mailgun({ apiKey: `${process.env.MAILGUN_API_KEY}`, domain: `${process.env.MAILGUN_DOMAIN}` });
 
-        const resetUrl = `http://pumase.ru/reset-password?token=${token}`; // URL для сброса пароля на фронтенде
+        const resetUrl = `http://pumase.ru/reset-password/${token}`; // URL для сброса пароля на фронтенде
 
         const data: mailgun.messages.SendData = {
             from: 'Support <aimbjp@gmail.com>',
