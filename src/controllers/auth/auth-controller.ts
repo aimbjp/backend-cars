@@ -180,6 +180,11 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
         res.status(400).send({success: false, message: 'Email is required'});
         return;
     }
+    const existingUserEmail = await findUserByEmail(email);
+    if (!existingUserEmail) {
+        res.status(400).send({success: false, message: 'This user is not registered'});
+        return;
+    }
 
     const token = await generateResetToken(email);
     await sendResetEmail(email, token);
