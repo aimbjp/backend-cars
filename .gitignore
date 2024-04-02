@@ -1,7 +1,7 @@
 # Project exclude paths
-/src/controllers/auth-controller.js
-/src/db/user/create-user.js
-/src/db/database.js
-/src/middleware/auth-middleware.js
-/src/routes/auth-routes.js
-/src/utils/token-utils.js
+/dist
+.env
+
+/.idea
+
+/node_modules
