@@ -3,13 +3,13 @@ import * as authController from '../controllers/auth/auth-controller';
 
 const authRoutes = Router();
 
-authRoutes.post('/register', authController.register);
-authRoutes.post('/login', authController.login);
-authRoutes.post('/token', authController.refreshToken);
-authRoutes.post('/request-password-reset', authController.requestPasswordReset);
-authRoutes.post('/reset-password', authController.resetPassword);
-authRoutes.post('/logout', authController.logout);
+const AUTH: '/auth' = '/auth';
 
-// example: router.post('/token', checkAccessToken, authController.refreshToken);
+authRoutes.post(AUTH + '/register', authController.register);
+authRoutes.post(AUTH + '/login', authController.login);
+authRoutes.post(AUTH + '/token', authController.refreshToken);
+authRoutes.post(AUTH + '/request-password-reset', authController.requestPasswordReset);
+authRoutes.post(AUTH + '/reset-password', authController.resetPassword);
+authRoutes.post(AUTH + '/logout', authController.logout);
 
 export default authRoutes;

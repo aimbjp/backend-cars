@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { saveRefreshToken } from "../db/user/refresh-token";
 import crypto from 'crypto';
-import {query} from "../db/database";
+import {query} from "../db/connection/database";
 
 /**
  * Генерирует access токен для пользователя.
@@ -103,5 +103,16 @@ export const deleteResetToken = async (token: string): Promise<void> => {
     } catch (error) {
         console.error(`Error deleting reset token = ${token}:`, error);
         throw error;
+    }
+};
+
+
+// Проверка валидности access токена
+export const verifyAccessToken = (token: string): UserRegistered | null => {
+    try {
+        const userData = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as UserRegistered;
+        return userData;
+    } catch (err) {
+        return null; // В случае ошибки при верификации возвращается null
     }
 };

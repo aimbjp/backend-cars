@@ -1,18 +1,21 @@
 import { Router } from 'express';
 import {checkAccessToken} from "../middleware/auth-middleware";
-import {getUserByIdController, updateUserController} from "../controllers/user/user-controller";
+import {getUserByIdController, updateUserController} from "../controllers/profile/user-controller";
 import {changePasswordController} from "../controllers/auth/auth-controller";
 
-const userRoutes = Router();
+const profileRoutes = Router();
+
+const USER: '/user' = '/user';
+
 
 // Маршрут для получения информации о пользователе по ID
-userRoutes.get('/', checkAccessToken, getUserByIdController);
+profileRoutes.get(USER + '/', checkAccessToken, getUserByIdController);
 
 // Маршрут для обновления данных пользователя
-userRoutes.patch('/', checkAccessToken, updateUserController);
+profileRoutes.patch( USER + '/', checkAccessToken, updateUserController);
 
-userRoutes.post('/change-password', checkAccessToken, changePasswordController);
+profileRoutes.post(USER + '/change-password', checkAccessToken, changePasswordController);
 
 // example: router.post('/token', checkAccessToken, authController.refreshToken);
 
-export default userRoutes;
+export default profileRoutes;

@@ -1,4 +1,4 @@
-import { query } from '../database'; // Импортируем функцию для выполнения запросов к базе данных
+import { query } from '../connection/database'; // Импортируем функцию для выполнения запросов к базе данных
 
 /**
  * Находит пользователя по его имени пользователя.
@@ -8,7 +8,7 @@ import { query } from '../database'; // Импортируем функцию д
  */
 export const findUserByUsername = async (username: string) => {
     const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
-    return rows[0]; // Вернет пользователя, если найден, иначе undefined
+    return {...rows[0], userId: rows[0].id}; // Вернет пользователя, если найден, иначе undefined
 };
 
 /**
@@ -19,9 +19,9 @@ export const findUserByUsername = async (username: string) => {
  */
 export const findUserByEmail = async (email: string) => {
     const { rows } = await query(
-        'SELECT id AS "userId", username, email, name, surname, role FROM users WHERE email = $1',
+        'SELECT id, username, email, name, surname, role, role_id FROM users WHERE email = $1',
         [email]);
-    return rows[0]; // Вернет пользователя, если найден, иначе undefined
+    return {...rows[0], userId: rows[0].id}; // Вернет пользователя, если найден, иначе undefined
 };
 
 /**
@@ -32,11 +32,11 @@ export const findUserByEmail = async (email: string) => {
  */
 export const findUserById = async (userId: number): Promise<UserRegistered | null> => {
     try {
-        const { rows } = await query('SELECT id, username, email, name, surname, role FROM users WHERE id = $1', [userId]);
+        const { rows } = await query('SELECT id, username, email, name, surname, role, role_id FROM users WHERE id = $1', [userId]);
         if (rows.length === 0) {
             return null; // Пользователь с таким ID не найден
         }
-        return rows[0]; // Возвращаем первую строку, так как ID уникален
+        return {...rows[0], userId: rows[0].id}; // Возвращаем первую строку, так как ID уникален
     } catch (err) {
         console.error('Error querying the database', err);
         throw err; // В случае ошибки при запросе к базе данных, перебрасываем исключение

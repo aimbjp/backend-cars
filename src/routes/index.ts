@@ -1,13 +1,18 @@
 import { Router } from 'express';
 import authRoutes from './auth-routes';
-import userRoutes from './user-routes';
+import profileRoutes from './profile-routes';
+import usersRoutes from "./users-routes";
+import carsRouter from "./car-routes";
 
 const router = Router();
 
-// Импорт и использование маршрутов аутентификации
 router.use(authRoutes);
 
-// Импорт и использование маршрутов пользователя
-router.use(userRoutes);
+router.use(profileRoutes);
+
+router.use(usersRoutes);
+
+router.use(carsRouter);
+
 
 export default router;

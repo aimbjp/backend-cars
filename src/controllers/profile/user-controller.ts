@@ -1,4 +1,3 @@
-// user.controller.ts
 import { Request, Response } from 'express';
 
 import {findUserById} from "../../db/user/find-user";

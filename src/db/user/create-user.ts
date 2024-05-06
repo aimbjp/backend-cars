@@ -1,4 +1,4 @@
-import { query } from '../database'; // Предположим, что у вас есть функция для выполнения запросов к базе данных
+import { query } from '../connection/database';
 
 /**
  * Создает нового пользователя в базе данных.
@@ -24,7 +24,7 @@ export const createUser = async ({ username, password, email, name, surname }: U
         );
 
         // Возвращаем данные созданного пользователя
-        return rows[0];
+        return {...rows[0], userId: rows[0].id};
     } catch (error: any) {
         // Логирование ошибки и выбрасывание исключения для обработки на более высоком уровне
         console.error('Error creating new user:', error);
