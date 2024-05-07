@@ -22,8 +22,13 @@ export class DrivesController {
     }
 
     static async createDrive(req: Request, res: Response) {
+        if (!req.body.name) res.status(404).json({ message: "Needed name in body", success: false})
         const driveRepository = getRepository(Drives);
-        const drive = driveRepository.create(req.body);
+        const existingDrive = await driveRepository.findOne({ where: { type: req.body.name } });
+        if (existingDrive) {
+            return res.status(201).json({message: 'Drive already exists.', drive: existingDrive, success: true});
+        }
+        const drive = driveRepository.create({type: req.body.name});
         await driveRepository.save(drive);
         res.status(201).json({success: true, drive});
     }

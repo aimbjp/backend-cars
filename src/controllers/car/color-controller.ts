@@ -22,8 +22,16 @@ export class ColorsController {
     }
 
     static async createColor(req: Request, res: Response) {
+        if (!req.body.name) res.status(404).json({ message: "Needed name in body", success: false})
+
         const colorRepository = getRepository(Color);
-        const color = colorRepository.create(req.body);
+
+        const existingColor = await colorRepository.findOne({ where: { type: req.body.name } });
+        if (existingColor) {
+            return res.status(201).json({message: 'Color already exists.', engine: existingColor, success: true});
+        }
+
+        const color = colorRepository.create({type: req.body.name});
         await colorRepository.save(color);
         res.status(201).json({color, success: true});
     }

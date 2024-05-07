@@ -52,6 +52,6 @@ export class Models {
   transmissions: Transmissions[];
 
   @ManyToOne(() => Brands, (brands) => brands.models)
-  @JoinColumn([{ name: "brand_id", referencedColumnName: "brandId" }])
-  brand: Brands;
+  @JoinColumn([{ name: "brand_id", referencedColumnName: "brandId"}])
+  brand: Brands | null;
 }

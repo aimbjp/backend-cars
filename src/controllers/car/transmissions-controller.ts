@@ -22,8 +22,16 @@ export class TransmissionsController {
     }
 
     static async createTransmission(req: Request, res: Response) {
+        if (!req.body.name) res.status(404).json({ message: "Needed name in body", success: false})
+
         const transmissionRepository = getRepository(Transmissions);
-        const transmission = transmissionRepository.create(req.body);
+
+        const existingTransmission = await transmissionRepository.findOne({ where: { type: req.body.name } });
+        if (existingTransmission) {
+            return res.status(201).json({message: 'Transmission already exists.', engine: existingTransmission, success: true});
+        }
+
+        const transmission = transmissionRepository.create({type: req.body.name});
         await transmissionRepository.save(transmission);
         res.status(201).json({transmission, success: true});
     }

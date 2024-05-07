@@ -22,8 +22,16 @@ export class BodyTypeController {
     }
 
     static async createBodyType(req: Request, res: Response) {
+        if (!req.body.name) res.status(404).json({ message: "Needed name in body", success: false})
+
         const bodyTypeRepository = getRepository(BodyType);
-        const bodyType = bodyTypeRepository.create(req.body);
+
+        const existingBodyType = await bodyTypeRepository.findOne({ where: { type: req.body.name } });
+        if (existingBodyType) {
+            return res.status(201).json({message: 'BodyType already exists.', engine: existingBodyType, success: true});
+        }
+
+        const bodyType = bodyTypeRepository.create({type: req.body.name});
         await bodyTypeRepository.save(bodyType);
         res.status(201).json({bodyType, success: true});
     }

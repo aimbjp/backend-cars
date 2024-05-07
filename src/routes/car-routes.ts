@@ -7,6 +7,7 @@ import {ModelsController} from "../controllers/car/models-controller";
 import {ColorsController} from "../controllers/car/color-controller";
 import {TransmissionsController} from "../controllers/car/transmissions-controller";
 import {BrandsController} from "../controllers/car/brands-controller";
+import {AssociatesController} from "../controllers/car/associates-controller";
 
 const carsRouter = Router();
 
@@ -18,6 +19,7 @@ const COLORS: '/colors' = '/colors';
 const TRANSMISSIONS: '/transmissions' = '/transmissions';
 const BODYTYPES: '/bodytypes' = '/bodytypes';
 const MODELS: '/models' = '/models';
+const ASSOCIATE: '/associate' = '/associate';
 
 
 carsRouter.post(CARS + '/', CarController.createCar);
@@ -65,9 +67,18 @@ carsRouter.delete(BODYTYPES + '/:id', BodyTypeController.deleteBodyType);
 
 carsRouter.get(MODELS + '/', ModelsController.getAllModels);
 carsRouter.get(MODELS + '/:id', ModelsController.getModelById);
+carsRouter.post(MODELS + '/brandId', ModelsController.getModelsByBrandId);
 carsRouter.post(MODELS + '/', ModelsController.createModel);
 carsRouter.put(MODELS + '/:id', ModelsController.updateModel);
 carsRouter.delete(MODELS + '/:id', ModelsController.deleteModel);
+carsRouter.get(MODELS + '-without-brand', ModelsController.getModelsWithoutBrand);
+
+
+carsRouter.post(ASSOCIATE + '/model-brand', ModelsController.getModelsWithoutBrand);
+carsRouter.post(ASSOCIATE + '/model-engine', AssociatesController.associateModelEngine);
+
+
+
 
 export default carsRouter;
 

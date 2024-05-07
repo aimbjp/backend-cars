@@ -22,8 +22,16 @@ export class EnginesController {
     }
 
     static async createEngine(req: Request, res: Response) {
+        if (!req.body.name) res.status(404).json({ message: "Needed name in body", success: false})
+
         const engineRepository = getRepository(Engines);
-        const engine = engineRepository.create(req.body);
+
+        const existingEngine = await engineRepository.findOne({ where: { type: req.body.name } });
+        if (existingEngine) {
+            return res.status(201).json({message: 'Engine already exists.', engine: existingEngine, success: true});
+        }
+
+        const engine = engineRepository.create({type: req.body.name});
         await engineRepository.save(engine);
         res.status(201).json({engine, success: true});
     }
