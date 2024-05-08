@@ -76,6 +76,10 @@ carsRouter.get(MODELS + '-without-brand', ModelsController.getModelsWithoutBrand
 
 carsRouter.post(ASSOCIATE + '/model-brand', ModelsController.getModelsWithoutBrand);
 carsRouter.post(ASSOCIATE + '/model-engine', AssociatesController.associateModelEngine);
+carsRouter.post(ASSOCIATE + '/model-drive', AssociatesController.associateModelDrive);
+carsRouter.post(ASSOCIATE + '/model-body-type', AssociatesController.associateModelBodyType);
+carsRouter.post(ASSOCIATE + '/model-transmission', AssociatesController.associateModelTransmission);
+carsRouter.post(ASSOCIATE + '/model-color', AssociatesController.associateModelColor);
 
 
 
