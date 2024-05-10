@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { Transmissions } from "../../db/entities/Transmissions";
+import {BodyType} from "../../db/entities/BodyType";
 
 export class TransmissionsController {
     static async getAllTransmissions(req: Request, res: Response) {
@@ -57,6 +58,23 @@ export class TransmissionsController {
             res.status(204).send();
         } else {
             res.status(404).json({ message: "Transmission not found" });
+        }
+    }
+
+    static async getTransmissionsByModelId (req: Request, res: Response) {
+        try {
+            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+
+            const transmissionRepository = getRepository(Transmissions);
+
+            const existingTransmission = await transmissionRepository.find({
+                where: { models: {modelId: req.body.modelId} }
+            });
+
+            res.status(201).json({transmissions: existingTransmission, success: true});
+
+        } catch (error: any) {
+            res.status(500).send(error.message);
         }
     }
 }

@@ -15,6 +15,7 @@ import { Models } from "./Models";
 import { Transmissions } from "./Transmissions";
 import { Listings } from "./Listings";
 import { Reviews } from "./Reviews";
+import {Brands} from "./Brands";
 
 @Entity("cars", { schema: "public" })
 export class Cars {
@@ -23,6 +24,8 @@ export class Cars {
 
   @Column("integer", { name: "year", nullable: true })
   year: number | null;
+
+
 
   @ManyToOne(() => BodyType, (bodyType) => bodyType.cars)
   @JoinColumn([{ name: "body_type_id", referencedColumnName: "bodyTypeId" }])

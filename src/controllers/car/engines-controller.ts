@@ -59,4 +59,21 @@ export class EnginesController {
             res.status(404).json({ message: "Engine not found" });
         }
     }
+
+    static async getEnginesByModelId (req: Request, res: Response) {
+        try {
+            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+
+            const engineRepository = getRepository(Engines);
+
+            const existingEngine = await engineRepository.find({
+                where: { models: {modelId: req.body.modelId} }
+            });
+
+            res.status(201).json({engines: existingEngine, success: true});
+
+        } catch (error: any) {
+            res.status(500).send(error.message);
+        }
+    }
 }

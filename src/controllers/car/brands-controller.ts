@@ -63,4 +63,5 @@ export class BrandsController {
             res.status(404).json({ message: "Brand not found" });
         }
     }
+
 }

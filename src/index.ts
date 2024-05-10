@@ -3,11 +3,12 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { handleSocketConnection } from './chat/websocket-server'; // Импортируем функцию для настройки WebSocket сервера
+import { handleSocketConnection } from './chat/websocket-server';
 import router from "./routes";
 import multer from 'multer';
 import path from 'path';
-
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 dotenv.config();
 
@@ -17,6 +18,28 @@ app.use(cors());
 
 app.use('/api', router);
 
+////////////////////////////////////////////////////////////////
+
+// const options = {
+//     definition: {
+//         openapi: '3.0.0',
+//         servers: [{
+//            url: 'http://localhost:3000/',
+//         }],
+//         info: {
+//             title: 'API Documentation',
+//             version: '1.0.0',
+//             description: 'Cars server',
+//         },
+//     },
+//     apis: ['./routes/*.js'],
+// };
+//
+// const swaggerSpec = swaggerJsdoc(options);
+//
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+////////////////////////////////
 
 ////////////////////////////////////////////////////////////////
 
@@ -56,4 +79,11 @@ handleSocketConnection(io);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
+
+
+
+
+
+
 export default app;
+

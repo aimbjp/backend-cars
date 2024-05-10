@@ -23,11 +23,14 @@ export class Listings {
   @Column("character varying", { name: "pts", nullable: true, length: 50 })
   pts: string | null;
 
-  @Column("character varying", { name: "VIN", nullable: false, length: 50 })
+  @Column("character varying", { name: "vin", nullable: false, length: 50 })
   VIN: string;
 
   @Column("character varying", { name: "place", nullable: true, length: 255 })
   place: string;
+
+  @Column("jsonb", { name: "media_url", nullable: true, default: () => ['http://pumase.ru/media-listings/default.png'] })
+  media_url: string[] | null;
 
   @Column("integer", { name: "owners_count", nullable: true })
   ownersCount: number | null;

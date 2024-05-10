@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { Drives } from "../../db/entities/Drives";
+import {BodyType} from "../../db/entities/BodyType";
 
 export class DrivesController {
     static async getAllDrives(req: Request, res: Response) {
@@ -54,6 +55,23 @@ export class DrivesController {
             res.status(204).send();
         } else {
             res.status(404).json({ message: "Drive not found" });
+        }
+    }
+
+    static async getDrivesByModelId (req: Request, res: Response) {
+        try {
+            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+
+            const driveRepository = getRepository(Drives);
+
+            const existingDrive = await driveRepository.find({
+                where: { models: {modelId: req.body.modelId} }
+            });
+
+            res.status(201).json({drives: existingDrive, success: true});
+
+        } catch (error: any) {
+            res.status(500).send(error.message);
         }
     }
 }

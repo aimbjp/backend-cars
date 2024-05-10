@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { Color } from "../../db/entities/Color";
+import {BodyType} from "../../db/entities/BodyType";
 
 export class ColorsController {
     static async getAllColors(req: Request, res: Response) {
@@ -57,6 +58,23 @@ export class ColorsController {
             res.status(204).send();
         } else {
             res.status(404).json({ message: "Color not found" });
+        }
+    }
+
+    static async getColorsByModelId (req: Request, res: Response) {
+        try {
+            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+
+            const colorRepository = getRepository(Color);
+
+            const existingColor = await colorRepository.find({
+                where: { models: {modelId: req.body.modelId} }
+            });
+
+            res.status(201).json({colors: existingColor, success: true});
+
+        } catch (error: any) {
+            res.status(500).send(error.message);
         }
     }
 }

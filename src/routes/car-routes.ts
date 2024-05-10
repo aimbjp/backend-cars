@@ -31,12 +31,14 @@ carsRouter.delete(CARS + '/:id', CarController.deleteCar);
 
 carsRouter.get(DRIVES + '/', DrivesController.getAllDrives);
 carsRouter.get(DRIVES + '/:id', DrivesController.getDriveById);
+carsRouter.post(DRIVES + '/modelId', DrivesController.getDrivesByModelId);
 carsRouter.post(DRIVES + '/', DrivesController.createDrive);
 carsRouter.put(DRIVES + '/:id', DrivesController.updateDrive);
 carsRouter.delete(DRIVES + '/:id', DrivesController.deleteDrive);
 
 carsRouter.get(ENGINES + '/', EnginesController.getAllEngines);
 carsRouter.get(ENGINES + '/:id', EnginesController.getEngineById);
+carsRouter.post(ENGINES + '/modelId', EnginesController.getEnginesByModelId);
 carsRouter.post(ENGINES + '/', EnginesController.createEngine);
 carsRouter.put(ENGINES + '/:id', EnginesController.updateEngine);
 carsRouter.delete(ENGINES + '/:id', EnginesController.deleteEngine);
@@ -49,18 +51,21 @@ carsRouter.delete(BRANDS + '/:id', BrandsController.deleteBrand);
 
 carsRouter.get(COLORS + '/', ColorsController.getAllColors);
 carsRouter.get(COLORS + '/:id', ColorsController.getColorById);
+carsRouter.post(COLORS + '/modelId', ColorsController.getColorsByModelId);
 carsRouter.post(COLORS + '/', ColorsController.createColor);
 carsRouter.put(COLORS + '/:id', ColorsController.updateColor);
 carsRouter.delete(COLORS + '/:id', ColorsController.deleteColor);
 
 carsRouter.get(TRANSMISSIONS + '/', TransmissionsController.getAllTransmissions);
 carsRouter.get(TRANSMISSIONS + '/:id', TransmissionsController.getTransmissionById);
+carsRouter.post(TRANSMISSIONS + '/modelId', TransmissionsController.getTransmissionsByModelId);
 carsRouter.post(TRANSMISSIONS + '/', TransmissionsController.createTransmission);
 carsRouter.put(TRANSMISSIONS + '/:id', TransmissionsController.updateTransmission);
 carsRouter.delete(TRANSMISSIONS + '/:id', TransmissionsController.deleteTransmission);
 
 carsRouter.get(BODYTYPES + '/', BodyTypeController.getAllBodyTypes);
 carsRouter.get(BODYTYPES + '/:id', BodyTypeController.getBodyTypeById);
+carsRouter.post(BODYTYPES + '/modelId', BodyTypeController.getBodyTypesByModelId);
 carsRouter.post(BODYTYPES + '/', BodyTypeController.createBodyType);
 carsRouter.put(BODYTYPES + '/:id', BodyTypeController.updateBodyType);
 carsRouter.delete(BODYTYPES + '/:id', BodyTypeController.deleteBodyType);

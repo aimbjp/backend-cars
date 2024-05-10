@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { BodyType } from "../../db/entities/BodyType";
+import {Engines} from "../../db/entities/Engines";
 
 export class BodyTypeController {
     static async getAllBodyTypes(req: Request, res: Response) {
@@ -57,6 +58,23 @@ export class BodyTypeController {
             res.status(204).send();
         } else {
             res.status(404).json({ message: "Body type not found" });
+        }
+    }
+
+    static async getBodyTypesByModelId (req: Request, res: Response) {
+        try {
+            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+
+            const bodyTypeRepository = getRepository(BodyType);
+
+            const existingBodyTypes = await bodyTypeRepository.find({
+                where: { models: {modelId: req.body.modelId} }
+            });
+
+            res.status(201).json({bodytypes: existingBodyTypes, success: true});
+
+        } catch (error: any) {
+            res.status(500).send(error.message);
         }
     }
 }
