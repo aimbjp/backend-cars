@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
+import {getRepository, In} from "typeorm";
 import { Drives } from "../../db/entities/Drives";
 import {BodyType} from "../../db/entities/BodyType";
 
@@ -58,20 +58,32 @@ export class DrivesController {
         }
     }
 
-    static async getDrivesByModelId (req: Request, res: Response) {
+    static async getDrivesByModelId(req: Request, res: Response) {
         try {
-            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+            const { modelId } = req.body;
+
+            if (!modelId) {
+                return res.status(400).json({ message: "Model ID is required", success: false });
+            }
 
             const driveRepository = getRepository(Drives);
+            let whereCondition;
+
+            if (Array.isArray(modelId)) {
+                whereCondition = { models: { modelId: In(modelId) } };
+            } else {
+                whereCondition = { models: { modelId: modelId } };
+            }
 
             const existingDrive = await driveRepository.find({
-                where: { models: {modelId: req.body.modelId} }
+                where: whereCondition,
+                relations: ['models']
             });
 
-            res.status(201).json({drives: existingDrive, success: true});
-
+            res.json({ drives: existingDrive, success: true });
         } catch (error: any) {
-            res.status(500).send(error.message);
+            console.error("Failed to fetch drives by model ID:", error);
+            res.status(500).send({ message: error.message, success: false });
         }
     }
 }

@@ -23,7 +23,7 @@ export class Listings {
   @Column("character varying", { name: "pts", nullable: true, length: 50 })
   pts: string | null;
 
-  @Column("character varying", { name: "vin", nullable: false, length: 50 })
+  @Column("character varying", { name: "vin", nullable: true, length: 50 })
   VIN: string;
 
   @Column("character varying", { name: "place", nullable: true, length: 255 })

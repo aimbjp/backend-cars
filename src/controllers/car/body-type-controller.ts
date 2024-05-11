@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
+import {getRepository, In} from "typeorm";
 import { BodyType } from "../../db/entities/BodyType";
 import {Engines} from "../../db/entities/Engines";
 
@@ -61,20 +61,27 @@ export class BodyTypeController {
         }
     }
 
-    static async getBodyTypesByModelId (req: Request, res: Response) {
+    static async getBodyTypesByModelId(req: Request, res: Response) {
         try {
-            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+            const { modelId } = req.body;
+            if (!modelId) {
+                return res.status(400).json({ message: "Model ID is required", success: false });
+            }
 
             const bodyTypeRepository = getRepository(BodyType);
+            const whereCondition = Array.isArray(modelId) ?
+                { models: { modelId: In(modelId) } } :
+                { models: { modelId: modelId } };
 
             const existingBodyTypes = await bodyTypeRepository.find({
-                where: { models: {modelId: req.body.modelId} }
+                where: whereCondition,
+                relations: ['models']
             });
 
-            res.status(201).json({bodytypes: existingBodyTypes, success: true});
-
+            res.json({ bodytypes: existingBodyTypes, success: true });
         } catch (error: any) {
-            res.status(500).send(error.message);
+            console.error("Failed to fetch body types by model ID:", error);
+            res.status(500).send({ message: error.message, success: false });
         }
     }
 }

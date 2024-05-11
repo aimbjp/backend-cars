@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
+import {getRepository, In} from "typeorm";
 import { Engines } from "../../db/entities/Engines";
 
 export class EnginesController {
@@ -60,20 +60,27 @@ export class EnginesController {
         }
     }
 
-    static async getEnginesByModelId (req: Request, res: Response) {
+    static async getEnginesByModelId(req: Request, res: Response) {
         try {
-            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+            const { modelId } = req.body;
+            if (!modelId) {
+                return res.status(400).json({ message: "Model ID is required", success: false });
+            }
 
             const engineRepository = getRepository(Engines);
+            const whereCondition = Array.isArray(modelId) ?
+                { models: { modelId: In(modelId) } } :
+                { models: { modelId: modelId } };
 
             const existingEngine = await engineRepository.find({
-                where: { models: {modelId: req.body.modelId} }
+                where: whereCondition,
+                relations: ['models']
             });
 
-            res.status(201).json({engines: existingEngine, success: true});
-
+            res.json({ engines: existingEngine, success: true });
         } catch (error: any) {
-            res.status(500).send(error.message);
+            console.error("Failed to fetch engines by model ID:", error);
+            res.status(500).send({ message: error.message, success: false });
         }
     }
 }

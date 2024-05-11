@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
+import {getRepository, In} from "typeorm";
 import { Transmissions } from "../../db/entities/Transmissions";
 import {BodyType} from "../../db/entities/BodyType";
 
@@ -61,20 +61,27 @@ export class TransmissionsController {
         }
     }
 
-    static async getTransmissionsByModelId (req: Request, res: Response) {
+    static async getTransmissionsByModelId(req: Request, res: Response) {
         try {
-            if (!req.body.modelId) res.status(404).json({ message: "Needed modelId in body", success: false})
+            const { modelId } = req.body;
+            if (!modelId) {
+                return res.status(400).json({ message: "Model ID is required", success: false });
+            }
 
             const transmissionRepository = getRepository(Transmissions);
+            const whereCondition = Array.isArray(modelId) ?
+                { models: { modelId: In(modelId) } } :
+                { models: { modelId: modelId } };
 
             const existingTransmission = await transmissionRepository.find({
-                where: { models: {modelId: req.body.modelId} }
+                where: whereCondition,
+                relations: ['models']
             });
 
-            res.status(201).json({transmissions: existingTransmission, success: true});
-
+            res.json({ transmissions: existingTransmission, success: true });
         } catch (error: any) {
-            res.status(500).send(error.message);
+            console.error("Failed to fetch transmissions by model ID:", error);
+            res.status(500).send({ message: error.message, success: false });
         }
     }
 }
