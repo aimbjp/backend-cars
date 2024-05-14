@@ -8,6 +8,9 @@ import { query } from '../connection/database'; // Импортируем фун
  */
 export const findUserByUsername = async (username: string) => {
     const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
+
+    if (rows.length < 1) { return undefined; }
+
     return {...rows[0], userId: rows[0].id}; // Вернет пользователя, если найден, иначе undefined
 };
 
@@ -21,7 +24,12 @@ export const findUserByEmail = async (email: string) => {
     const { rows } = await query(
         'SELECT id, username, email, name, surname, role, role_id FROM users WHERE email = $1',
         [email]);
-    return {...rows[0], userId: rows[0].id}; // Вернет пользователя, если найден, иначе undefined
+
+    if (rows.length > 0){
+        return {...rows[0], userId: rows[0].id};
+    }
+
+    return undefined;
 };
 
 /**

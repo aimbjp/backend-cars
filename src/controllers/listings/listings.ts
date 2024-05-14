@@ -13,6 +13,8 @@ import {
 import { Listings } from "../../db/entities/Listings";
 import {Cars} from "../../db/entities/Cars";
 import {calculateTax} from "../../utils/calculate-tax";
+import { omit } from "lodash";
+import {ListStatus} from "../../db/entities/ListStatus";
 
 export class ListingsController {
     static async getListings(req: Request, res: Response) {
@@ -94,13 +96,38 @@ export class ListingsController {
 
     static async getListingById(req: Request, res: Response) {
         const listingsRepository = getRepository(Listings);
-        const listing = await listingsRepository.findOne({
-            where: {listingId: parseInt(req.params.id)}
-        });
-        if (listing) {
-            res.json({listing, success: true});
-        } else {
-            res.status(404).json({ message: "Listing not found", success: false });
+        try {
+            const listing = await listingsRepository.findOne({
+                where: { listingId: parseInt(req.params.id) },
+                relations: [
+                    "car",
+                    "car.model",
+                    "car.model.brand",
+                    "car.bodyType",
+                    "car.color",
+                    "car.drive",
+                    "car.engine",
+                    "car.transmission",
+                    "user",
+                    "user.contactInfo",
+                    "listStatus"
+                ]
+            });
+
+            if (listing) {
+                const listingWithoutVIN = omit(listing, ['VIN']);
+                const listingWithoutVINandPTS = omit(listingWithoutVIN, ['pts']);
+                res.json({ listing: {...listingWithoutVINandPTS, user: {
+                            userId: listingWithoutVINandPTS.user?.id,
+                            name: listingWithoutVINandPTS.user?.name,
+                            contactInfo: listingWithoutVINandPTS.user?.contactInfo,
+                        }}, success: true });
+            } else {
+                res.status(404).json({ message: "Listing not found", success: false });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Internal server error", success: false });
         }
     }
 
@@ -188,6 +215,51 @@ export class ListingsController {
             res.status(204).send();
         } else {
             res.status(404).json({ message: "Listing not found" });
+        }
+    }
+
+    static async getListingsStatuses(req: Request, res: Response) {
+        const listingsStatusesRepository = getRepository(ListStatus);
+
+        try {
+            const result = await listingsStatusesRepository.find();
+
+            if (result) {
+                res.json({ listingsStatuses: result, success: true });
+            } else {
+                res.status(404).json({ message: "Listing statuses not found", success: false });
+            }
+        } catch (error) {
+            console.error("Error fetching listing statuses:", error);
+            res.status(500).json({ message: "Internal server error", success: false });
+        }
+    }
+
+    static async updateListingStatus(req: Request, res: Response) {
+        const { listingId, statusId } = req.body;
+
+        if (!listingId || !statusId) {
+            return res.status(400).json({ message: "Listing ID and Status ID are required", success: false });
+        }
+
+        const listingsRepository = getRepository(Listings);
+        const listStatusRepository = getRepository(ListStatus);
+
+        try {
+            const listing = await listingsRepository.findOne({ where: { listingId } });
+            const status = await listStatusRepository.findOne({ where: { listStatusId: statusId } });
+
+            if (!listing || !status) {
+                return res.status(404).json({ message: "Listing or Status not found", success: false });
+            }
+
+            listing.listStatus = status;
+            await listingsRepository.save(listing);
+
+            res.json({ listing, success: true });
+        } catch (error) {
+            console.error("Error updating listing status:", error);
+            res.status(500).json({ message: "Internal server error", success: false });
         }
     }
 }
