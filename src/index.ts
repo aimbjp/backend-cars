@@ -9,6 +9,7 @@ import multer from 'multer';
 import path from 'path';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import 'reflect-metadata';
 
 dotenv.config();
 

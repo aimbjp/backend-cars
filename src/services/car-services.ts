@@ -24,11 +24,9 @@ export class CarService {
         });
     }
 
-    static async updateCar(id: number, carData: any): Promise<Cars | null> {
+    static async updateCar(id: number, carData: Partial<CarData>): Promise<Cars | null> {
         const carRepository = getRepository(Cars);
-        const car = await carRepository.findOne({
-            where: { carId: id }
-        });
+        const car = await carRepository.findOne({ where: { carId: id } });
         if (!car) {
             return null;
         }
@@ -36,6 +34,7 @@ export class CarService {
         await carRepository.save(car);
         return car;
     }
+
 
     static async deleteCar(id: number): Promise<boolean> {
         const carRepository = getRepository(Cars);

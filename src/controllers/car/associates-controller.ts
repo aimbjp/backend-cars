@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {getRepository, Repository} from "typeorm";
+import {getRepository, In, Repository} from "typeorm";
 import {Models} from "../../db/entities/Models";
 import {Engines} from "../../db/entities/Engines";
 import {Drives} from "../../db/entities/Drives";
@@ -19,39 +19,35 @@ export class AssociatesController {
         const enginesRepository: Repository<Engines> = getRepository(Engines);
 
         try {
-            const modelsPromises = modelIds.map((modelId: any) =>
-                modelsRepository.findOne({
-                    where: { modelId },
-                    relations: ["engines"],
-                })
-            );
-            const models = await Promise.all(modelsPromises);
+            // Находим модели
+            const models = await modelsRepository.find({
+                where: { modelId: In(modelIds) },
+                relations: ["engines"]
+            });
 
-            const enginesPromises = engineIds.map((engineId: any) =>
-                enginesRepository.findOne({ where: engineId })
-            );
-            const engines = await Promise.all(enginesPromises);
+            // Находим двигатели
+            const engines = await enginesRepository.find({
+                where: { engineId: In(engineIds) }
+            });
+
+            // Проверка, найдены ли все модели
+            if (models.length !== modelIds.length) {
+                return res.status(400).json({ message: "Some models not found" });
+            }
+
+            // Проверка, найдены ли все двигатели
+            if (engines.length !== engineIds.length) {
+                return res.status(400).json({ message: "Some engines not found" });
+            }
 
             const linkedModels: Models[] = [];
 
             for (const model of models) {
-                if (!model) {
-                    continue;
-                }
+                if (!model) continue;
 
-                const linkedEngines = [];
-                for (const engineId of engineIds) {
-                    const engine = engines.find((e) => e.engineId === engineId);
-                    if (!engine) {
-                        continue;
-                    }
-
-                    if (model.engines.some((existingEngine: any) => existingEngine.engineId === engineId)) {
-                        continue;
-                    }
-
-                    linkedEngines.push(engine);
-                }
+                const linkedEngines = engines.filter(engine =>
+                    !model.engines.some(existingEngine => existingEngine.engineId === engine.engineId)
+                );
 
                 if (linkedEngines.length) {
                     model.engines.push(...linkedEngines);
@@ -66,6 +62,7 @@ export class AssociatesController {
             for (const model of linkedModels) {
                 await modelsRepository.save(model);
             }
+
             res.json({ message: "Links successfully created" });
         } catch (error) {
             console.error(error);
