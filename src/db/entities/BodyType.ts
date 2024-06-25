@@ -1,14 +1,7 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { Cars } from "./Cars";
-import { Models } from "./Models";
+// BodyType.ts
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Cars } from './Cars';
+import { Models } from './Models';
 
 @Entity("body_type", { schema: "public" })
 export class BodyType {

@@ -20,7 +20,7 @@ export class ListingsController {
     static async getListings(req: Request, res: Response) {
         const page = parseInt(req.body.page as string) || 1;
         const limit = parseInt(req.body.limit as string) || 60;
-        const sort = req.body.sort as keyof Listings || 'price';
+        const sort = req.body.sort as keyof Listings || '';
         const order = (req.body.order as 'ASC' | 'DESC') || 'ASC';
 
         const priceMin = parseFloat(req.body.priceMin as string);
@@ -62,7 +62,7 @@ export class ListingsController {
             where: whereConditions,
             take: limit,
             skip: (page - 1) * limit,
-            order: { [sort]: order },
+            // order: { [sort]: order },
             relations: ["car", "car.model", "car.model.brand", "car.color", "car.bodyType", "car.transmission", "car.engine", "car.drive"]
         });
 
