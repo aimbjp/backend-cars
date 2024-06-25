@@ -1,4 +1,4 @@
-import { query } from '../database';
+import { query } from '../connection/database';
 import bcrypt from "bcrypt"; // Функция для выполнения запросов к БД
 
 /**

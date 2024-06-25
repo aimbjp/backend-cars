@@ -1,4 +1,4 @@
-import { query } from '../database';
+import { query } from '../connection/database';
 
 /**
  * Сохраняет refresh токен для пользователя в базе данных с ограничением на количество активных сессий.

@@ -26,7 +26,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const { username, password, email, name, surname } = req.body;
 
         if (!email || !password || !username) {
-            res.status(400).send({success: false, message: 'Email and password are required'});
+            res.status(400).send({success: false, message: 'Email, username and password are required'});
             return;
         }
 
